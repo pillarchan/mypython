@@ -8,8 +8,10 @@ load_dotenv()
 API_KEY = os.getenv('API_KEY')
 bot = telebot.TeleBot(API_KEY)
 
-whiteID = [1185083831,5175988241,1969603285,1317379638,761175875,1174929680,1518915241,1476158596,1195552086,1923316074,1299780896]
-
+whiteID = os.getenv('WHITE_ID').split(',') 
+whiteIDInt = []
+for i in whiteID:
+    whiteIDInt.append(int(i))
 
 def addip(message):
     request = message.text.split()
@@ -56,7 +58,7 @@ def help(message):
 def send_result(message):
     request = message.text.split()
     order, item, ip = request
-    if(message.chat.id not in whiteID):
+    if(message.chat.id not in whiteIDInt):
         bot.send_message(
             message.chat.id, 'ID未加白不能使用,请通知管理员加白ID:%s' % message.chat.id)
     else:
