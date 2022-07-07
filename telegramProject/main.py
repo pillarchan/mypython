@@ -1,17 +1,17 @@
 import os
-from unittest import result
-from dotenv import load_dotenv
 import telebot
 import re
+from dotenv import load_dotenv
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
 bot = telebot.TeleBot(API_KEY)
 
-whiteID = os.getenv('WHITE_ID').split(',') 
+whiteID = os.getenv('WHITE_ID').split(',')
 whiteIDInt = []
 for i in whiteID:
     whiteIDInt.append(int(i))
+
 
 def addip(message):
     request = message.text.split()
@@ -27,6 +27,39 @@ def is_ip(ip):
         return True
     else:
         return False
+
+
+hostsPath = '/etc/ansible/hosts.whitened'
+items = [
+    {'name': 'kf', 'addYmlPath': '/opt/whitened_bot/add_kf_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_kf_admin_ip.yml'},
+    {'name': 'ww', 'addYmlPath': '/opt/whitened_bot/add_ww_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_ww_admin_ip.yml'},
+    {'name': 'ng', 'addYmlPath': '/opt/whitened_bot/add_ng_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_ng_admin_ip.yml'},
+    {'name': 'c7', 'addYmlPath': '/opt/whitened_bot/add_c7_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_c7_admin_ip.yml'},
+    {'name': 'c7team', 'addYmlPath': '/opt/whitened_bot/add_c7team_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_c7team_admin_ip.yml'},
+    {'name': '28q', 'addYmlPath': '/opt/whitened_bot/add_28q_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_28q_admin_ip.yml'},
+    {'name': 'yh', 'addYmlPath': '/opt/whitened_bot/add_yh_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_yh_admin_ip.yml'},
+    {'name': 'pp', 'addYmlPath': '/opt/whitened_bot/add_pp_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_pp_admin_ip.yml'},
+    {'name': 'wd', 'addYmlPath': '/opt/whitened_bot/add_wd_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_wd_admin_ip.yml'},
+    {'name': 'hb', 'addYmlPath': '/opt/whitened_bot/add_hb_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_hb_admin_ip.yml'},
+    {'name': 'hx', 'addYmlPath': '/opt/whitened_bot/add_hx_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_hx_admin_ip.yml'}
+]
+
+
+def chooseItem(item):
+    for i in items:
+        if(i['name'] == item):
+            return i
 
 
 @bot.message_handler(commands=['start'])
@@ -55,7 +88,7 @@ def help(message):
 
 
 @bot.message_handler(func=addip)
-def send_result(message):
+def send_res(message):
     request = message.text.split()
     order, item, ip = request
     if(message.chat.id not in whiteIDInt):
@@ -67,143 +100,18 @@ def send_result(message):
         elif(item not in 'ng,c7,28q,yh,wd,ww,hb,c7team,kf,pp,hx'):
             bot.send_message(message.chat.id, '没有'+item+'这个项目')
         else:
-            if(item == 'kf' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/chat_history/add_chat_history_admin_ip.yml -i /etc/ansible/hosts.kefu -e ip=%s' % ip)
-                if(result == 0):
+            myitem = chooseItem(item)
+            if(order == 'addip'):
+                res = os.system(
+                    'ansible-playbook ' + myitem['addYmlPath'] + ' -i ' + hostsPath + ' -e ip=%s' % ip)
+                if(res == 0):
                     bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
                 else:
                     bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item == 'kf' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/chat_history/del_chat_history_admin_ip.yml -i /etc/ansible/hosts.kefu -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
-            elif(item == 'ww' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/wangwang/add_ww_admin_ip.yml -i /etc/ansible/hosts.wwadmin -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item == 'ww' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/wangwang/del_ww_admin_ip.yml -i /etc/ansible/hosts.wwadmin -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
-            elif(item == 'ng' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/add_ng_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item == 'ng' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/del_ng_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
-            elif(item in 'c7,c7team' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/add_c7_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item in 'c7,c7team' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/del_c7_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
-            elif(item == '28q' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/add_28q_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item == '28q' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/del_28q_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
-            elif(item == 'yh' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/add_yh_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item == 'yh' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/del_yh_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
-            elif(item == 'pp' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/add_pp_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item == 'pp' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/del_pp_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
-            elif(item == 'wd' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/add_wd_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item == 'wd' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/del_wd_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
-            elif(item == 'hb' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/add_hb_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item == 'hb' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/del_hb_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
-            elif(item == 'hx' and order == 'addip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/add_hx_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'成功')
-                else:
-                    bot.send_message(message.chat.id, item+'添加ip:'+ip+'失败')
-            elif(item == 'hx' and order == 'delip'):
-                result = os.system(
-                    'ansible-playbook /opt/whitened_bot/del_hx_admin_ip.yml -i /etc/ansible/hosts.whitened -e ip=%s' % ip)
-                if(result == 0):
+            elif(order == 'delip'):
+                res = os.system(
+                    'ansible-playbook ' + myitem['delYmlPath'] + ' -i ' + hostsPath + ' -e ip=%s' % ip)
+                if(res == 0):
                     bot.send_message(message.chat.id, item+'删除ip:'+ip+'成功')
                 else:
                     bot.send_message(message.chat.id, item+'删除ip:'+ip+'失败')
@@ -212,4 +120,3 @@ def send_result(message):
 
 
 bot.polling()
-
