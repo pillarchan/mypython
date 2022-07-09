@@ -1,6 +1,4 @@
-import os
-import telebot
-import re
+import os,telebot,re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -52,9 +50,11 @@ items = [
     {'name': 'hb', 'addYmlPath': '/opt/whitened_bot/add_hb_admin_ip.yml',
         'delYmlPath': '/opt/whitened_bot/del_hb_admin_ip.yml'},
     {'name': 'hx', 'addYmlPath': '/opt/whitened_bot/add_hx_admin_ip.yml',
-        'delYmlPath': '/opt/whitened_bot/del_hx_admin_ip.yml'}
+        'delYmlPath': '/opt/whitened_bot/del_hx_admin_ip.yml'},
+    {'name': 'newcard', 'addYmlPath': '/opt/whitened_bot/add_newcard_admin_ip.yml',
+        'delYmlPath': '/opt/whitened_bot/del_newcard_admin_ip.yml'}
 ]
-
+itemsList = 'ng,c7,28q,yh,wd,ww,hb,c7team,kf,pp,hx,newcard'
 
 def chooseItem(item):
     for i in items:
@@ -83,7 +83,8 @@ def help(message):
             c7team-C7推广后台\n\
             kf-客服后台\n\
             pp-匹配后台\n\
-            hx-哈希后台'
+            hx-哈希后台\n\
+            newcard-匹配上下分后台'
     bot.reply_to(message, introduce)
 
 
@@ -97,7 +98,7 @@ def send_res(message):
     else:
         if(is_ip(ip) == False):
             bot.send_message(message.chat.id, 'IP格式为1.1.1.1')
-        elif(item not in 'ng,c7,28q,yh,wd,ww,hb,c7team,kf,pp,hx'):
+        elif(item not in itemsList):
             bot.send_message(message.chat.id, '没有'+item+'这个项目')
         else:
             myitem = chooseItem(item)
@@ -120,3 +121,4 @@ def send_res(message):
 
 
 bot.polling()
+
